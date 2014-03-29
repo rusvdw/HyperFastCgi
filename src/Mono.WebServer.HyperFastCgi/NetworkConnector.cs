@@ -188,12 +188,23 @@ namespace Mono.WebServer.HyperFastCgi
 								Buffer.BlockCopy (state.buffer, offset, state.header, state.arrayOffset, len);
 								offset += len;
 								state.arrayOffset = 0;
-								state.record.Version = state.header [0];
-								state.record.Type = (RecordType)state.header [1];
-								state.record.RequestId = (ushort)((state.header [2] << 8) + state.header [3]);
-								state.record.BodyLength = (ushort)((state.header [4] << 8) + state.header [5]);
-								state.record.PaddingLength = state.header [6];
-								state.record.Body = new byte[state.record.BodyLength];
+								state.record = RecordsManager.Instance.GetRecord(
+									state.header [0],
+									(RecordType)state.header [1],
+									(ushort)((state.header [2] << 8) + state.header [3]),
+									null,
+									0,
+									(ushort)((state.header [4] << 8) + state.header [5]),
+									state.header [6]
+								);
+
+//								state.record.Version = state.header [0];
+//								state.record.Type = (RecordType)state.header [1];
+//								state.record.RequestId = (ushort)((state.header [2] << 8) + state.header [3]);
+//								state.record.BodyLength = (ushort)((state.header [4] << 8) + state.header [5]);
+//								state.record.PaddingLength = state.header [6];
+								if (state.record.Body == null) 
+									state.record.Body = new byte[state.record.BodyLength];
 								//skip reserved field header[7]
 								state.State = ReadState.Body;
 								if (state.record.BodyLength == 0) {
@@ -280,7 +291,7 @@ namespace Mono.WebServer.HyperFastCgi
 				break;
 			case RecordType.Params:
 				if (request != null)
-					request.AddParameterData (record.Body, true); 
+					request.AddParameterData (record.Body, record.BodyLength, true); 
 				break;
 			case RecordType.StandardInput:
 				//Ready to process
@@ -321,6 +332,8 @@ namespace Mono.WebServer.HyperFastCgi
 					new UnknownTypeBody (record.Type).GetData ()));
 				break;
 			}
+
+			RecordsManager.Instance.ReleaseRecord (record);
 		}
 
 		private void ProcessInternal (object state)
@@ -358,6 +371,7 @@ namespace Mono.WebServer.HyperFastCgi
 					sendState.buffer = packet.GetRecord ();
 					sendState.offset = 0;
 					sendState.workSocket = this.client;
+					RecordsManager.Instance.ReleaseRecord(packet);
 				}
 			} catch (Exception ex) {
 				Interlocked.Exchange (ref sendProcessing, 0);
@@ -489,9 +503,12 @@ namespace Mono.WebServer.HyperFastCgi
 		                        byte[] bodyData, int bodyIndex,
 		                        int bodyLength)
 		{
-			Record record = new Record (Record.ProtocolVersion, type, requestID,
-				               bodyData, bodyIndex,
-				               bodyLength);
+//			Record record = new Record (Record.ProtocolVersion, type, requestID,
+//				               bodyData, bodyIndex,
+//				               bodyLength);
+			Record record = RecordsManager.Instance.GetRecord (Record.ProtocolVersion, type, requestID,
+				bodyData, bodyIndex,
+				bodyLength);
 
 			SendRecord (record);
 		}

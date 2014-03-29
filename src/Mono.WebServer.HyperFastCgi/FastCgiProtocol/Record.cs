@@ -50,8 +50,9 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 		UnknownType = 11
 	}
 
-	public struct Record
+	public class Record
 	{
+		public int CacheIndex = -1;
 		public byte Version;
 		public RecordType Type;
 		public ushort RequestId;
@@ -72,26 +73,18 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 
 		#region Constructors
 
-		public Record (byte version, RecordType type, ushort requestID,
-		               byte[] bodyData) : this (version, type,
-		                           requestID, bodyData,
-		                           0, -1)
+		public Record ()
+		{
+		}
+
+		public Record (byte version, RecordType type, ushort requestID, byte[] bodyData) : 
+		this (version, type, requestID, bodyData, 0, bodyData.Length)
 		{
 		}
 
 		public Record (byte version, RecordType type, ushort requestID,
 		               byte[] bodyData, int bodyIndex, int bodyLength)
 		{
-			if (bodyData == null)
-				throw new ArgumentNullException ("bodyData");
-
-			if (bodyIndex < 0 || bodyIndex > bodyData.Length)
-				throw new ArgumentOutOfRangeException (
-					"bodyIndex");
-
-			if (bodyLength < 0)
-				bodyLength = bodyData.Length - bodyIndex;
-
 			if (bodyLength > MaxBodySize)
 				throw new ArgumentException (
 					Strings.Record_DataTooBig,
@@ -131,6 +124,21 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 		{
 			byte[] buffer = new byte[HeaderSize + BodyLength + PaddingLength];
 
+			GetBytes (buffer);
+//			buffer [0] = Version;
+//			buffer [1] = (byte)Type;
+//			buffer [2] = (byte)(RequestId >> 8);
+//			buffer [3] = (byte)(RequestId & 0xff);
+//			buffer [4] = (byte)(BodyLength >> 8);
+//			buffer [5] = (byte)(BodyLength & 0xff);
+//			buffer [6] = PaddingLength;
+//			Buffer.BlockCopy (this.Body, BodyOffset, buffer, HeaderSize, BodyLength);
+
+			return buffer;
+		}
+
+		public int GetBytes(byte[] buffer)
+		{
 			buffer [0] = Version;
 			buffer [1] = (byte)Type;
 			buffer [2] = (byte)(RequestId >> 8);
@@ -140,7 +148,7 @@ namespace Mono.WebServer.HyperFastCgi.FastCgiProtocol
 			buffer [6] = PaddingLength;
 			Buffer.BlockCopy (this.Body, BodyOffset, buffer, HeaderSize, BodyLength);
 
-			return buffer;
+			return HeaderSize + BodyLength + PaddingLength;
 		}
 
 		#endregion

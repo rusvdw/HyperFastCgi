@@ -89,7 +89,7 @@ namespace Mono.WebServer.HyperFastCgi
 			return unknownHeadersDict [name];
 		}
 
-		public bool AddParameterData (byte[] data, bool parseHeaders)
+		public bool AddParameterData (byte[] data, int dataLength, bool parseHeaders)
 		{
 			// Validate arguments in public methods.
 			if (data == null)
@@ -106,9 +106,9 @@ namespace Mono.WebServer.HyperFastCgi
 
 			// If data was provided, append it to that already
 			// received, and exit.
-			if (data.Length > 0) {
+			if (dataLength > 0) {
 				//parameter_data.AddRange (data);
-				ParseParameters (data, parseHeaders);
+				ParseParameters (data, dataLength, parseHeaders);
 				return false;
 			}
 
@@ -128,9 +128,8 @@ namespace Mono.WebServer.HyperFastCgi
 //			ParseParameterData ();
 		}
 
-		private void ParseParameters (byte[] data, bool parseHeaders)
+		private void ParseParameters (byte[] data, int dataLength, bool parseHeaders)
 		{
-			int dataLength = data.Length;
 			int offset = 0;
 			int nlen, vlen;
 			string name, value;

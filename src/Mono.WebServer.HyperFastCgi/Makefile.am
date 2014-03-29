@@ -68,6 +68,7 @@ FILES =  \
 	FastCgiProtocol/BeginRequestBody.cs \
 	FastCgiProtocol/EndRequestBody.cs \
 	FastCgiProtocol/Record.cs \
+	FastCgiProtocol/RecordsManager.cs \
 	FastCgiProtocol/UnknownTypeBody.cs \
 	Logging/Logger.cs \
 	Logging/LogLevel.cs \

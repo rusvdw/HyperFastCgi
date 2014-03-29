@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8ED4E686-5CA8-4A80-AA10-D10D994630FB}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -25,7 +25,12 @@
         <Variable name="MONO_PATH" value="." />
       </EnvironmentVariables>
     </EnvironmentVariables>
-    <Commandlineparameters>/applications=ssbench3:/:/var/www/ssbench3 /socket=tcp:127.0.0.1:9000 /loglevels=Debug /printlog</Commandlineparameters>
+    <Commandlineparameters>/applications=ssbench3:/:/var/www/nginx-mono /socket=tcp:127.0.0.1:9000 /loglevels=Debug /printlog  /logfile=fastcgi.log /keepalive=false /minthreads=20,4</Commandlineparameters>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="rm -f mscorlib.dll" workingdir="${TargetDir}" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -73,6 +78,7 @@
     <Compile Include="WebServer\Events\MapPathEventArgs.cs" />
     <Compile Include="WebServer\Events\MapPathEventHandler.cs" />
     <Compile Include="WebServer\Events\DomainReloadEventArgs.cs" />
+    <Compile Include="FastCgiProtocol\RecordsManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

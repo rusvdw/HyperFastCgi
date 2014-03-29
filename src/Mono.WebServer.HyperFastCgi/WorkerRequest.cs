@@ -157,9 +157,10 @@ namespace Mono.WebServer.HyperFastCgi
 			EnsureHeadersSent ();
 
 			//copy data to temp buffer to be sure that data can't change 
-			byte[] buffer = new byte[length];
-			Buffer.BlockCopy (data, 0, buffer, 0, length);
-			connector.SendOutput (cgiRequest.RequestId, buffer, length);
+//			byte[] buffer = new byte[length];
+//			Buffer.BlockCopy (data, 0, buffer, 0, length);
+//			connector.SendOutput (cgiRequest.RequestId, buffer, length);
+			connector.SendOutput (cgiRequest.RequestId, data, length);
 		}
 
 		public override void SendStatus (int statusCode, string statusDescription)
